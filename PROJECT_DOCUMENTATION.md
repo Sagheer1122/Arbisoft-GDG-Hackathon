@@ -42,7 +42,70 @@ NurseFlow follows a decoupled client-server architecture.
 
 ---
 
-## 3. Core Module 1: Duty Roster Calendar Engine
+## 3. Complete Frontend Architecture & Component Reference
+
+The frontend application (`client/src/`) is built using React 18, Vite, TypeScript, and Tailwind CSS, structured into modular pages, reusable UI components, navigation systems, and global state providers.
+
+---
+
+### 📱 3.1 All 21 Page Views (`client/src/pages/`)
+
+| Page Component | Route URL | Role Guard | Functionality & UX Description |
+| :--- | :--- | :--- | :--- |
+| **`SplashPage.tsx`** | `/` | Public | High-impact landing page featuring photorealistic nurse portraits, brand tagline, animated CTAs, and role selection shortcuts. |
+| **`RoleSelectionPage.tsx`** | `/role-selection` | Public | Interactive portal for choosing Nurse vs Administrator workspace login. |
+| **`LoginPage.tsx`** | `/login` | Public | JWT authentication login screen with demo credentials quick-fill buttons. |
+| **`NurseDashboard.tsx`** | `/nurse/dashboard` | Nurse, Admin | Nurse home portal featuring active shift hero card, quick actions grid, recent announcements, and weekly schedule preview. |
+| **`AdminDashboard.tsx`** | `/admin/dashboard` | Admin | Executive overview with staffing metrics, ward attendance rates, quick shift creation, and pending request queues. |
+| **`NurseRoster.tsx`** | `/nurse/roster` | Nurse, Admin | Weekly/monthly duty roster calendar grid with color-coded shift cards and dedicated `View Details →` action buttons. |
+| **`CreateRosterPage.tsx`** | `/admin/roster/create` | Admin | Admin schedule builder interface for assigning shifts across hospital wards. |
+| **`ShiftDetailsPage.tsx`** | `/nurse/shifts/:id` | Nurse, Admin | Detailed view of a shift assignment, handover notes, assigned ward, and peer staff contacts. |
+| **`CommunicationSimulatorPage.tsx`** | `/nurse/communication-simulator` | Nurse, Admin | Scenario selection dashboard for the Gemma 4 AI Patient Simulator (*Anxious Patient, Angry Family Member*). |
+| **`CommunicationSessionPage.tsx`** | `/nurse/communication-simulator/session/:id` | Nurse, Admin | Live roleplay chat room with emotion status pills (*Calm, Worried, Confused, Frustrated, Angry, Reassured*) & Gemma 4 reply. |
+| **`CommunicationResultsPage.tsx`** | `/nurse/communication-simulator/session/:id/results` | Nurse, Admin | Post-simulation analysis dashboard displaying 8-competency radar scores, quote highlights, strengths, and AI advice. |
+| **`TicTacToeGamePage.tsx`** | `/nurse/break-games/tic-tac-toe` | Nurse, Admin | AI Tick & Cross break game featuring 3 difficulty modes (*Easy, Medium, Unbeatable Minimax*), 10-min timer, and scoreboard. |
+| **`ShiftSwapPage.tsx`** | `/nurse/shift-swap` | Nurse | Form to submit shift exchange requests with target peer nurses. |
+| **`LeaveRequestPage.tsx`** | `/nurse/leave-request` | Nurse | Form to apply for Sick, Annual, or Emergency leave with date selectors. |
+| **`MyRequestsPage.tsx`** | `/nurse/requests` | Nurse | Nurse personal status tracker for pending/approved shift swaps and leave applications. |
+| **`PendingRequestsPage.tsx`** | `/admin/requests` | Admin | Admin portal to review, approve, or reject pending leave and swap applications. |
+| **`StaffManagementPage.tsx`** | `/admin/staff` | Admin | Staff directory for viewing and updating employee roles and ward departments. |
+| **`NotificationsPage.tsx`** | `/nurse/notifications` | Auth | Real-time push notification center with unread filtering and mark-as-read actions. |
+| **`DutyReportPage.tsx`** | `/admin/reports` | Admin | Ward staffing analytics and duty hours reporting interface. |
+| **`ProfilePage.tsx`** | `/nurse/profile` | Auth | User profile settings, employee badge ID, and department settings. |
+| **`PublicPage.tsx`** | `/public` | Public | Public ward information landing page. |
+
+---
+
+### 🧩 3.2 Reusable UI Component Library (`client/src/components/ui/`)
+
+- **`Button.tsx`**: Polymorphic button supporting `primary`, `secondary`, `outline`, `ghost`, `danger`, `success` variants, loading spinner, and icon props.
+- **`Card.tsx`**: Glassmorphic container with hover elevation tokens (`shadow-nurse-sm`, `shadow-nurse-md`).
+- **`Badge.tsx`**: Status indicator pills for shift categories (*Morning, Evening, Night, Off Duty*) and approvals (*Pending, Approved, Rejected*).
+- **`Modal.tsx`**: Accessible modal overlay backdrop for popups, shift notes, and confirmation dialogs.
+- **`Input.tsx` & `Select.tsx`**: Custom styled form input fields and dropdown select components with validation ring states.
+- **`StatCard.tsx`**: Dashboard metric display card with icon badges and trend indicators.
+- **`RealisticNurseDisplay.tsx`**: Dual photorealistic nurse avatar component displaying female nurse with full hijab & male nurse together side-by-side.
+
+---
+
+### 🧭 3.3 Navigation & Layout System (`client/src/components/navigation/` & `client/src/layouts/`)
+
+- **`Sidebar.tsx`**: Desktop left navigation menu with active link highlighting, badge counts, and reordered AI feature links positioned right above Profile.
+- **`Topbar.tsx`**: Glassmorphic header bar with user avatar, role badge, notification bell dropdown, and quick logout action.
+- **`MobileBottomNav.tsx`**: Bottom navigation tab bar for mobile viewports with quick icons.
+- **`MainLayout.tsx`**: Master layout wrapper integrating Sidebar, Topbar, and MobileBottomNav with responsive content area.
+
+---
+
+### ⚡ 3.4 Context Providers & State Management (`client/src/context/`)
+
+- **`AuthContext.tsx`**: Manages global user authentication state, JWT Bearer token storage in `localStorage`, login, register, profile fetching, and logout.
+- **`SocketContext.tsx`**: Establishes bi-directional Socket.IO WebSocket connection with backend server, manages real-time emergency ward alert popups, and syncs unread notification counters.
+- **`api.ts Service Layer`**: Axios API wrapper with request interceptors injecting Bearer tokens, providing type-safe backend call methods for all 25+ REST endpoints.
+
+---
+
+## 4. Core Module 1: Duty Roster Calendar Engine
 
 The Roster Calendar module (`NurseRoster.tsx`) presents weekly and monthly calendar views.
 

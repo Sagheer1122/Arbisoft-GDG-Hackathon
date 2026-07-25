@@ -33,7 +33,7 @@ class NumberedCanvas(canvas.Canvas):
         
         # Header (pages > 1)
         if self._pageNumber > 1:
-            self.drawString(40, 755, "NurseFlow — Complete System Architecture & Data Model Documentation")
+            self.drawString(40, 755, "NurseFlow — Complete System & Frontend Architecture Manual")
             self.setStrokeColor(colors.HexColor("#E7E7F0"))
             self.setLineWidth(0.5)
             self.line(40, 747, 572, 747)
@@ -139,21 +139,6 @@ def build_pdf():
         alignment=TA_LEFT
     )
 
-    code_style = ParagraphStyle(
-        'CodeStyle',
-        parent=styles['Normal'],
-        fontName='Courier',
-        fontSize=7.5,
-        leading=9.5,
-        textColor=colors.HexColor("#1E293B"),
-        backColor=BG_LIGHT,
-        borderColor=BORDER_COLOR,
-        borderWidth=0.5,
-        borderPadding=5,
-        spaceBefore=4,
-        spaceAfter=6
-    )
-
     table_header_style = ParagraphStyle(
         'TableHeader',
         parent=styles['Normal'],
@@ -177,212 +162,108 @@ def build_pdf():
     story = []
 
     # COVER HEADER
-    story.append(Paragraph("🏥 NurseFlow — Enterprise System & Database Architecture Manual", title_style))
-    story.append(Paragraph("Full Technical Reference | 12 Prisma Relational Database Models, Gemma 4 AI Simulator & Shift Break Engine", subtitle_style))
+    story.append(Paragraph("🏥 NurseFlow — Full Platform & Frontend Architecture Manual", title_style))
+    story.append(Paragraph("Comprehensive Frontend Architecture Reference | All Pages, UI Components, Context Providers & 12 Database Schemas", subtitle_style))
     story.append(HRFlowable(width="100%", thickness=2.5, color=PURPLE_PRIMARY, spaceAfter=15))
 
     # SECTION 1: EXECUTIVE OVERVIEW
-    story.append(Paragraph("1. Executive Overview & Platform Objectives", h1_style))
+    story.append(Paragraph("1. Executive Overview & System Architecture", h1_style))
     story.append(Paragraph(
-        "<b>NurseFlow</b> is a full-stack healthcare scheduling and clinical simulation platform. Built using React 18, Node.js, Prisma ORM, SQLite, Socket.IO, and Google Gemma 4 AI, NurseFlow solves shift scheduling friction, nurse fatigue, and clinical communication challenges across hospital wards.",
-        body_style
-    ))
-    story.append(Paragraph("• <b>Duty Roster Optimization:</b> Standardized shift timings (Morning 7am-3pm, Evening 3pm-11pm, Night 11pm-7am) with non-overlapping card layouts.", bullet_style))
-    story.append(Paragraph("• <b>Gemma 4 AI Patient Simulator:</b> Educational roleplay simulator with dynamic emotion tracking and 8-competency evaluations.", bullet_style))
-    story.append(Paragraph("• <b>AI Break Lounge Games:</b> 100% non-medical relaxation games (Tick & Cross) for 10-minute shift breaks.", bullet_style))
-    story.append(Paragraph("• <b>Real-Time Push Alerts:</b> Socket.IO WebSocket push notifications for emergency ward calls and swap approvals.", bullet_style))
-
-    story.append(Spacer(1, 10))
-
-    # SECTION 2: ALL 12 PRISMA DATABASE MODELS EXPLAINED IN DETAIL
-    story.append(Paragraph("2. Full Database Schema Data Dictionary (All 12 Prisma Models)", h1_style))
-    story.append(Paragraph(
-        "NurseFlow utilizes <b>Prisma ORM</b> with a relational SQLite database (<code>dev.db</code>). Below is the comprehensive technical breakdown of all 12 database models, their fields, default values, and relational constraints.",
+        "<b>NurseFlow</b> is built as a Single-Page Application (SPA) using React 18, Vite, TypeScript, and Tailwind CSS. The frontend architecture is structured into decoupled modules comprising pages, reusable UI components, navigation layouts, global context providers, and API service integration.",
         body_style
     ))
 
-    all_models_data = [
-        ("1. User Model", "Stores staff credentials, role permissions (NURSE, ADMIN, HEAD_NURSE), department assignments, and contact details.", [
-            ("id", "String (UUID)", "Primary Key"),
-            ("name", "String", "Full Name of Staff Member"),
-            ("email", "String (Unique)", "Login Credential Email"),
-            ("passwordHash", "String", "Bcrypt Hashed Password"),
-            ("role", "String (Default: NURSE)", "NURSE | ADMIN | HEAD_NURSE"),
-            ("employeeId", "String (Unique)", "Hospital Badge ID"),
-            ("departmentId", "String (Optional)", "Foreign Key to Department"),
-            ("phone", "String (Optional)", "Contact Mobile Number"),
-            ("avatar", "String (Optional)", "Profile Picture Path")
-        ]),
-        ("2. Department Model", "Represents hospital ward units (e.g., General Ward, Intensive Care Unit, Emergency, Pediatrics).", [
-            ("id", "String (UUID)", "Primary Key"),
-            ("name", "String (Unique)", "Department Name"),
-            ("description", "String (Optional)", "Ward Description & Capacity")
-        ]),
-        ("3. Shift Model", "Defines hospital shift timings, color coding, and shift categories.", [
-            ("id", "String (UUID)", "Primary Key"),
-            ("name", "String", "Shift Name (Morning, Evening, Night)"),
-            ("startTime", "String", "Formatted Start Time (e.g., 7:00 AM)"),
-            ("endTime", "String", "Formatted End Time (e.g., 3:00 PM)"),
-            ("type", "String", "MORNING | EVENING | NIGHT | OFF"),
-            ("color", "String", "Theme Color Code (green, yellow, purple, gray)")
-        ]),
-        ("4. Roster Model", "Stores daily duty assignments linking nurses, shifts, and departments.", [
-            ("id", "String (UUID)", "Primary Key"),
-            ("nurseId", "String", "Foreign Key to User (Cascade Delete)"),
-            ("shiftId", "String", "Foreign Key to Shift (Cascade Delete)"),
-            ("departmentId", "String", "Foreign Key to Department (Cascade Delete)"),
-            ("date", "String", "Duty Date (YYYY-MM-DD)"),
-            ("status", "String (Default: SCHEDULED)", "ON_DUTY | SCHEDULED | OFF | COMPLETED"),
-            ("notes", "String (Optional)", "Handover Shift Instructions")
-        ]),
-        ("5. LeaveRequest Model", "Tracks leave applications submitted by nurses and review decisions by administrators.", [
-            ("id", "String (UUID)", "Primary Key"),
-            ("nurseId", "String", "Foreign Key to User (Applicant)"),
-            ("leaveType", "String", "Annual Leave | Sick Leave | Emergency"),
-            ("fromDate", "String", "Start Date (YYYY-MM-DD)"),
-            ("toDate", "String", "End Date (YYYY-MM-DD)"),
-            ("reason", "String", "Application Reason Text"),
-            ("status", "String (Default: PENDING)", "PENDING | APPROVED | REJECTED"),
-            ("reviewedBy", "String (Optional)", "Foreign Key to Admin User"),
-            ("reviewedAt", "DateTime (Optional)", "Timestamp of Review Decision")
-        ]),
-        ("6. ShiftSwapRequest Model", "Manages nurse-to-nurse shift exchange applications.", [
-            ("id", "String (UUID)", "Primary Key"),
-            ("requesterId", "String", "Foreign Key to User (Requesting Nurse)"),
-            ("targetNurseId", "String", "Foreign Key to User (Peer Nurse)"),
-            ("originalShiftId", "String", "Foreign Key to Original Shift"),
-            ("requestedDate", "String", "Target Shift Date (YYYY-MM-DD)"),
-            ("reason", "String", "Swap Justification Note"),
-            ("status", "String (Default: PENDING)", "PENDING | APPROVED | REJECTED"),
-            ("reviewedBy", "String (Optional)", "Foreign Key to Admin Reviewer")
-        ]),
-        ("7. Notification Model", "Stores user-specific push notifications and emergency ward alerts.", [
-            ("id", "String (UUID)", "Primary Key"),
-            ("userId", "String", "Foreign Key to User"),
-            ("title", "String", "Notification Header Title"),
-            ("message", "String", "Push Notification Content"),
-            ("type", "String (Default: INFO)", "SHIFTS | LEAVE | SWAP | ROSTER | ALERT | INFO"),
-            ("isRead", "Boolean (Default: false)", "Read/Unread State Flag")
-        ]),
-        ("8. CommunicationScenario Model", "Defines AI simulation roleplay scenarios and character personalities.", [
-            ("id", "String (UUID)", "Primary Key"),
-            ("title", "String", "Scenario Header Title"),
-            ("category", "String", "Patient | Family | Elderly | Emergency"),
-            ("description", "String", "Detailed Context & Medical Background"),
-            ("characterRole", "String", "Patient | Family Member | Elderly Patient"),
-            ("personality", "String", "Anxious | Hostile | Confused | Demanding"),
-            ("difficulty", "String (Default: BEGINNER)", "BEGINNER | INTERMEDIATE | ADVANCED"),
-            ("objectives", "String", "JSON Array String of Learning Goals")
-        ]),
-        ("9. CommunicationSession Model", "Tracks active and completed AI roleplay sessions.", [
-            ("id", "String (UUID)", "Primary Key"),
-            ("userId", "String", "Foreign Key to User (Nurse)"),
-            ("scenarioId", "String", "Foreign Key to CommunicationScenario"),
-            ("characterRole", "String", "Roleplayed Character Persona"),
-            ("difficulty", "String", "Simulation Complexity Level"),
-            ("status", "String (Default: ACTIVE)", "ACTIVE | COMPLETED | ABANDONED"),
-            ("overallScore", "Int (Optional)", "Final Overall Score (0-100)")
-        ]),
-        ("10. CommunicationMessage Model", "Stores individual dialogue turns and emotion states in roleplay chats.", [
-            ("id", "String (UUID)", "Primary Key"),
-            ("sessionId", "String", "Foreign Key to CommunicationSession"),
-            ("role", "String", "NURSE or PATIENT"),
-            ("content", "String", "Transcribed Dialogue Text"),
-            ("emotion", "String (Default: Calm)", "Calm | Worried | Confused | Frustrated | Angry | Reassured")
-        ]),
-        ("11. CommunicationAnalysis Model", "Stores 8-competency scores and AI clinical feedback reports.", [
-            ("id", "String (UUID)", "Primary Key"),
-            ("sessionId", "String (Unique)", "Foreign Key to CommunicationSession"),
-            ("overallScore", "Int", "Calculated Overall Score (0-100)"),
-            ("empathyScore", "Int", "Empathy & Compassion Score"),
-            ("activeListeningScore", "Int", "Active Listening Score"),
-            ("clarityScore", "Int", "Communication Clarity Score"),
-            ("professionalismScore", "Int", "Professional Composure Score"),
-            ("emotionalIntelligenceScore", "Int", "EQ & Self-Awareness Score"),
-            ("deEscalationScore", "Int", "De-escalation Score"),
-            ("patientEngagementScore", "Int", "Patient Engagement Score"),
-            ("confidenceScore", "Int", "Clinical Confidence Score"),
-            ("strengths", "String", "JSON Array String of Key Strengths"),
-            ("improvementAreas", "String", "JSON Array String of Growth Areas"),
-            ("feedback", "String", "Comprehensive AI Coaching Summary Text")
-        ]),
-        ("12. NurseGameScore Model", "Tracks nurse wins, AI wins, draws, and earned wellness points in Tick & Cross game.", [
-            ("id", "String (UUID)", "Primary Key"),
-            ("userId", "String", "Foreign Key to User (Nurse)"),
-            ("gameType", "String (Default: TIC_TAC_TOE)", "Break Game Category"),
-            ("nurseWins", "Int (Default: 0)", "Total Nurse Victory Count"),
-            ("aiWins", "Int (Default: 0)", "Total Gemma 4 AI Victory Count"),
-            ("draws", "Int (Default: 0)", "Total Draw Count"),
-            ("pointsEarned", "Int (Default: 0)", "Total Shift Wellness Points Earned")
-        ])
-    ]
-
-    for m_title, m_desc, fields in all_models_data:
-        story.append(Paragraph(f"<b>{m_title}</b>", h2_style))
-        story.append(Paragraph(m_desc, body_style))
-        
-        table_rows = [[Paragraph("<b>Field Name</b>", table_header_style), Paragraph("<b>Data Type & Constraints</b>", table_header_style), Paragraph("<b>Description</b>", table_header_style)]]
-        for f_name, f_type, f_desc in fields:
-            table_rows.append([
-                Paragraph(f"<code>{f_name}</code>", table_body_style),
-                Paragraph(f_type, table_body_style),
-                Paragraph(f_desc, table_body_style)
-            ])
-        
-        t_model = Table(table_rows, colWidths=[120, 180, 232])
-        t_model.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), PURPLE_PRIMARY),
-            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-            ('GRID', (0, 0), (-1, -1), 0.5, BORDER_COLOR),
-            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, BG_LIGHT]),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
-            ('TOPPADDING', (0, 0), (-1, -1), 4),
-        ]))
-        story.append(t_model)
-        story.append(Spacer(1, 8))
-
     story.append(Spacer(1, 10))
 
-    # SECTION 3: COMPLETE REST API ENDPOINTS
-    story.append(Paragraph("3. Full REST API Endpoints Specification", h1_style))
-    
-    api_data = [
-        [Paragraph("<b>Method</b>", table_header_style), Paragraph("<b>Endpoint Route</b>", table_header_style), Paragraph("<b>Functionality Description</b>", table_header_style), Paragraph("<b>Access</b>", table_header_style)],
-        [Paragraph("POST", table_body_style), Paragraph("/api/auth/login", table_body_style), Paragraph("Authenticate user credentials & return JWT token", table_body_style), Paragraph("Public", table_body_style)],
-        [Paragraph("POST", table_body_style), Paragraph("/api/auth/register", table_body_style), Paragraph("Register new nurse or administrator account", table_body_style), Paragraph("Public", table_body_style)],
-        [Paragraph("GET", table_body_style), Paragraph("/api/users", table_body_style), Paragraph("Fetch list of all staff nurses & employees", table_body_style), Paragraph("Admin", table_body_style)],
-        [Paragraph("GET", table_body_style), Paragraph("/api/rosters", table_body_style), Paragraph("Fetch duty rosters (filter by date/nurse)", table_body_style), Paragraph("Auth", table_body_style)],
-        [Paragraph("POST", table_body_style), Paragraph("/api/rosters", table_body_style), Paragraph("Assign shift roster entry to nurse", table_body_style), Paragraph("Admin", table_body_style)],
-        [Paragraph("POST", table_body_style), Paragraph("/api/leave-requests", table_body_style), Paragraph("Submit leave application (Sick, Annual)", table_body_style), Paragraph("Nurse", table_body_style)],
-        [Paragraph("POST", table_body_style), Paragraph("/api/shift-swaps", table_body_style), Paragraph("Request shift exchange with target nurse", table_body_style), Paragraph("Nurse", table_body_style)],
-        [Paragraph("POST", table_body_style), Paragraph("/api/notifications/send-alert", table_body_style), Paragraph("Broadcast ward emergency push notification", table_body_style), Paragraph("Admin", table_body_style)],
-        [Paragraph("GET", table_body_style), Paragraph("/api/communication-simulator/scenarios", table_body_style), Paragraph("Fetch roleplay scenarios list", table_body_style), Paragraph("Auth", table_body_style)],
-        [Paragraph("POST", table_body_style), Paragraph("/api/communication-simulator/sessions", table_body_style), Paragraph("Initialize new AI roleplay session", table_body_style), Paragraph("Auth", table_body_style)],
-        [Paragraph("POST", table_body_style), Paragraph("/api/communication-simulator/sessions/:id/messages", table_body_style), Paragraph("Send nurse dialogue & get AI roleplay reply", table_body_style), Paragraph("Auth", table_body_style)],
-        [Paragraph("POST", table_body_style), Paragraph("/api/communication-simulator/sessions/:id/end", table_body_style), Paragraph("End session & generate 8-competency evaluation", table_body_style), Paragraph("Auth", table_body_style)],
-        [Paragraph("POST", table_body_style), Paragraph("/api/games/tic-tac-toe/move", table_body_style), Paragraph("Compute Gemma 4 AI move (Minimax)", table_body_style), Paragraph("Auth", table_body_style)],
-        [Paragraph("POST", table_body_style), Paragraph("/api/games/tic-tac-toe/score", table_body_style), Paragraph("Save match outcome & update wellness points", table_body_style), Paragraph("Auth", table_body_style)]
+    # SECTION 2: FRONTEND PAGES SPECIFICATION
+    story.append(Paragraph("2. Complete Frontend Pages Specification (All 21 Views)", h1_style))
+    story.append(Paragraph(
+        "Below is the complete technical reference for every single page component in the <code>client/src/pages/</code> codebase.",
+        body_style
+    ))
+
+    pages_data = [
+        [Paragraph("<b>Page Component</b>", table_header_style), Paragraph("<b>Route URL</b>", table_header_style), Paragraph("<b>Role Guard</b>", table_header_style), Paragraph("<b>Description & Functionality</b>", table_header_style)],
+        [Paragraph("SplashPage.tsx", table_body_style), Paragraph("/", table_body_style), Paragraph("Public", table_body_style), Paragraph("Landing page with realistic nurse avatars, features, and quick login shortcuts.", table_body_style)],
+        [Paragraph("RoleSelectionPage.tsx", table_body_style), Paragraph("/role-selection", table_body_style), Paragraph("Public", table_body_style), Paragraph("Interactive portal for choosing Nurse vs Administrator workspace login.", table_body_style)],
+        [Paragraph("LoginPage.tsx", table_body_style), Paragraph("/login", table_body_style), Paragraph("Public", table_body_style), Paragraph("JWT authentication login screen with demo credentials quick-fill buttons.", table_body_style)],
+        [Paragraph("NurseDashboard.tsx", table_body_style), Paragraph("/nurse/dashboard", table_body_style), Paragraph("Nurse, Admin", table_body_style), Paragraph("Nurse home portal with active shift banner, quick actions, and schedule preview.", table_body_style)],
+        [Paragraph("AdminDashboard.tsx", table_body_style), Paragraph("/admin/dashboard", table_body_style), Paragraph("Admin", table_body_style), Paragraph("Executive overview with staffing metrics, ward attendance, and request queues.", table_body_style)],
+        [Paragraph("NurseRoster.tsx", table_body_style), Paragraph("/nurse/roster", table_body_style), Paragraph("Nurse, Admin", table_body_style), Paragraph("Weekly/monthly roster calendar grid with color-coded shifts & details buttons.", table_body_style)],
+        [Paragraph("CreateRosterPage.tsx", table_body_style), Paragraph("/admin/roster/create", table_body_style), Paragraph("Admin", table_body_style), Paragraph("Admin schedule builder interface for assigning shifts across hospital wards.", table_body_style)],
+        [Paragraph("ShiftDetailsPage.tsx", table_body_style), Paragraph("/nurse/shifts/:id", table_body_style), Paragraph("Nurse, Admin", table_body_style), Paragraph("Detailed view of a shift assignment, handover notes, and ward contacts.", table_body_style)],
+        [Paragraph("CommunicationSimulatorPage.tsx", table_body_style), Paragraph("/nurse/communication-simulator", table_body_style), Paragraph("Nurse, Admin", table_body_style), Paragraph("Scenario selection dashboard for the Gemma 4 AI Patient Simulator.", table_body_style)],
+        [Paragraph("CommunicationSessionPage.tsx", table_body_style), Paragraph("/nurse/communication-simulator/session/:id", table_body_style), Paragraph("Nurse, Admin", table_body_style), Paragraph("Live roleplay chat room with emotion status pills & real-time Gemma 4 reply.", table_body_style)],
+        [Paragraph("CommunicationResultsPage.tsx", table_body_style), Paragraph("/nurse/communication-simulator/session/:id/results", table_body_style), Paragraph("Nurse, Admin", table_body_style), Paragraph("Post-simulation analysis dashboard displaying 8-competency radar scores & advice.", table_body_style)],
+        [Paragraph("TicTacToeGamePage.tsx", table_body_style), Paragraph("/nurse/break-games/tic-tac-toe", table_body_style), Paragraph("Nurse, Admin", table_body_style), Paragraph("AI Tick & Cross break game with 3 difficulty modes, 10-min timer, and scoreboard.", table_body_style)],
+        [Paragraph("ShiftSwapPage.tsx", table_body_style), Paragraph("/nurse/shift-swap", table_body_style), Paragraph("Nurse", table_body_style), Paragraph("Form to submit shift exchange requests with target peer nurses.", table_body_style)],
+        [Paragraph("LeaveRequestPage.tsx", table_body_style), Paragraph("/nurse/leave-request", table_body_style), Paragraph("Nurse", table_body_style), Paragraph("Form to apply for Sick, Annual, or Emergency leave with date selectors.", table_body_style)],
+        [Paragraph("MyRequestsPage.tsx", table_body_style), Paragraph("/nurse/requests", table_body_style), Paragraph("Nurse", table_body_style), Paragraph("Nurse personal status tracker for pending/approved swaps & leave applications.", table_body_style)],
+        [Paragraph("PendingRequestsPage.tsx", table_body_style), Paragraph("/admin/requests", table_body_style), Paragraph("Admin", table_body_style), Paragraph("Admin portal to review, approve, or reject pending leave and swap applications.", table_body_style)],
+        [Paragraph("StaffManagementPage.tsx", table_body_style), Paragraph("/admin/staff", table_body_style), Paragraph("Admin", table_body_style), Paragraph("Staff directory for viewing and updating employee roles & ward departments.", table_body_style)],
+        [Paragraph("NotificationsPage.tsx", table_body_style), Paragraph("/nurse/notifications", table_body_style), Paragraph("Auth", table_body_style), Paragraph("Real-time push notification center with unread filtering & mark-read actions.", table_body_style)],
+        [Paragraph("DutyReportPage.tsx", table_body_style), Paragraph("/admin/reports", table_body_style), Paragraph("Admin", table_body_style), Paragraph("Ward staffing analytics and duty hours reporting interface.", table_body_style)],
+        [Paragraph("ProfilePage.tsx", table_body_style), Paragraph("/nurse/profile", table_body_style), Paragraph("Auth", table_body_style), Paragraph("User profile settings, employee badge ID, and department settings.", table_body_style)]
     ]
 
-    t_api = Table(api_data, colWidths=[50, 195, 210, 77])
-    t_api.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), PURPLE_DARK),
+    t_pages = Table(pages_data, colWidths=[115, 150, 75, 192])
+    t_pages.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), PURPLE_PRIMARY),
         ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
         ('GRID', (0, 0), (-1, -1), 0.5, BORDER_COLOR),
         ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, BG_LIGHT]),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
-        ('TOPPADDING', (0, 0), (-1, -1), 5),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+        ('TOPPADDING', (0, 0), (-1, -1), 4),
     ]))
-    story.append(t_api)
+    story.append(t_pages)
+
+    story.append(Spacer(1, 12))
+
+    # SECTION 3: REUSABLE UI COMPONENTS & NAVIGATION
+    story.append(Paragraph("3. Reusable UI Components & Layout Systems", h1_style))
+    
+    ui_data = [
+        [Paragraph("<b>Component Name</b>", table_header_style), Paragraph("<b>File Path</b>", table_header_style), Paragraph("<b>Description & Styling Tokens</b>", table_header_style)],
+        [Paragraph("Button.tsx", table_body_style), Paragraph("components/ui/Button.tsx", table_body_style), Paragraph("Polymorphic button supporting primary, secondary, outline, ghost, danger, success variants, loading spinner, and icon props.", table_body_style)],
+        [Paragraph("Card.tsx", table_body_style), Paragraph("components/ui/Card.tsx", table_body_style), Paragraph("Glassmorphic container card with hover elevation tokens (shadow-nurse-sm, shadow-nurse-md).", table_body_style)],
+        [Paragraph("Badge.tsx", table_body_style), Paragraph("components/ui/Badge.tsx", table_body_style), Paragraph("Status pill indicators for shift types (Morning, Evening, Night) and approvals (Pending, Approved, Rejected).", table_body_style)],
+        [Paragraph("Modal.tsx", table_body_style), Paragraph("components/ui/Modal.tsx", table_body_style), Paragraph("Accessible modal overlay backdrop for popups, shift notes, and confirmation dialogs.", table_body_style)],
+        [Paragraph("Input.tsx & Select.tsx", table_body_style), Paragraph("components/ui/Input.tsx", table_body_style), Paragraph("Custom styled form input fields and dropdown select components with validation ring states.", table_body_style)],
+        [Paragraph("StatCard.tsx", table_body_style), Paragraph("components/ui/StatCard.tsx", table_body_style), Paragraph("Dashboard metric display card with icon badges and trend indicators.", table_body_style)],
+        [Paragraph("RealisticNurseDisplay.tsx", table_body_style), Paragraph("components/ui/RealisticNurseDisplay.tsx", table_body_style), Paragraph("Dual photorealistic nurse avatar component displaying female nurse with full hijab & male nurse together.", table_body_style)],
+        [Paragraph("Sidebar.tsx", table_body_style), Paragraph("components/navigation/Sidebar.tsx", table_body_style), Paragraph("Desktop left navigation menu with active link highlighting, badge counts, and reordered AI feature links right above Profile.", table_body_style)],
+        [Paragraph("Topbar.tsx", table_body_style), Paragraph("components/navigation/Topbar.tsx", table_body_style), Paragraph("Glassmorphic header bar with user avatar, role badge, notification bell dropdown, and quick logout.", table_body_style)],
+        [Paragraph("MobileBottomNav.tsx", table_body_style), Paragraph("components/navigation/MobileBottomNav.tsx", table_body_style), Paragraph("Bottom navigation tab bar for mobile viewports with quick icons.", table_body_style)],
+        [Paragraph("MainLayout.tsx", table_body_style), Paragraph("layouts/MainLayout.tsx", table_body_style), Paragraph("Master layout wrapper integrating Sidebar, Topbar, and MobileBottomNav with responsive content area.", table_body_style)]
+    ]
+
+    t_ui = Table(ui_data, colWidths=[120, 160, 252])
+    t_ui.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), PURPLE_DARK),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ('GRID', (0, 0), (-1, -1), 0.5, BORDER_COLOR),
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, BG_LIGHT]),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+        ('TOPPADDING', (0, 0), (-1, -1), 4),
+    ]))
+    story.append(t_ui)
+
+    story.append(Spacer(1, 12))
+
+    # SECTION 4: CONTEXT PROVIDERS & STATE MANAGEMENT
+    story.append(Paragraph("4. Context Providers & Global State Management", h1_style))
+    story.append(Paragraph("• <b>AuthContext.tsx:</b> Manages global user authentication state, JWT Bearer token storage in <code>localStorage</code>, login, register, profile fetching, and logout functions.", bullet_style))
+    story.append(Paragraph("• <b>SocketContext.tsx:</b> Establishes bi-directional Socket.IO WebSocket connection with backend server, manages real-time emergency ward alert popups, and syncs unread notification counters.", bullet_style))
+    story.append(Paragraph("• <b>api.ts Service Layer:</b> Axios API wrapper with request interceptors injecting Bearer tokens, providing type-safe backend call methods for all 25+ REST endpoints.", bullet_style))
 
     story.append(Spacer(1, 15))
     story.append(HRFlowable(width="100%", thickness=1, color=PURPLE_PRIMARY, spaceAfter=10))
-    story.append(Paragraph("NurseFlow Complete System & Database Manual  |  GitHub: Sagheer1122/Arbisoft-GDG-Hackathon", subtitle_style))
+    story.append(Paragraph("NurseFlow Complete Frontend & System Documentation  |  GitHub: Sagheer1122/Arbisoft-GDG-Hackathon", subtitle_style))
 
     doc.build(story, canvasmaker=NumberedCanvas)
-    print(f"PDF documentation with ALL 12 Prisma models successfully generated at {pdf_filename}")
+    print(f"PDF documentation with complete Frontend Reference generated at {pdf_filename}")
 
 if __name__ == "__main__":
     build_pdf()
