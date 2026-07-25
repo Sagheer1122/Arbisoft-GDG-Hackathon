@@ -1,0 +1,199 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         String   @default("NURSE") // NURSE, ADMIN, HEAD_NURSE
+  phone        String?
+  employeeId   String   @unique
+  departmentId String?
+  avatar       String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  department            Department?            @relation(fields: [departmentId], references: [id])
+  rosters               Roster[]
+  leaveRequests         LeaveRequest[]         @relation("NurseLeaves")
+  reviewedLeaveRequests LeaveRequest[]        @relation("ReviewerLeaves")
+  shiftSwapsRequested   ShiftSwapRequest[]     @relation("RequesterSwaps")
+  shiftSwapsTargeted    ShiftSwapRequest[]     @relation("TargetSwaps")
+  reviewedShiftSwaps    ShiftSwapRequest[]     @relation("ReviewerSwaps")
+  notifications         Notification[]
+  communicationSessions CommunicationSession[]
+  gameScores            NurseGameScore[]
+}
+
+model Department {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+
+  users   User[]
+  rosters Roster[]
+}
+
+model Shift {
+  id        String   @id @default(uuid())
+  name      String
+  startTime String
+  endTime   String
+  type      String   // MORNING, EVENING, NIGHT, OFF
+  color     String   // green, yellow, purple, gray
+  createdAt DateTime @default(now())
+
+  rosters      Roster[]
+  swapRequests ShiftSwapRequest[]
+}
+
+model Roster {
+  id           String   @id @default(uuid())
+  nurseId      String
+  shiftId      String
+  departmentId String
+  date         String   // YYYY-MM-DD
+  status       String   @default("SCHEDULED") // ON_DUTY, SCHEDULED, OFF, COMPLETED
+  notes        String?
+  createdBy    String?
+  createdAt    DateTime @default(now())
+
+  nurse      User       @relation(fields: [nurseId], references: [id], onDelete: Cascade)
+  shift      Shift      @relation(fields: [shiftId], references: [id], onDelete: Cascade)
+  department Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+}
+
+model LeaveRequest {
+  id         String    @id @default(uuid())
+  nurseId    String
+  leaveType  String
+  fromDate   String
+  toDate     String
+  reason     String
+  attachment String?
+  status     String    @default("PENDING") // PENDING, APPROVED, REJECTED
+  reviewedBy String?
+  reviewedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  nurse    User  @relation("NurseLeaves", fields: [nurseId], references: [id], onDelete: Cascade)
+  reviewer User? @relation("ReviewerLeaves", fields: [reviewedBy], references: [id])
+}
+
+model ShiftSwapRequest {
+  id              String    @id @default(uuid())
+  requesterId     String
+  targetNurseId   String
+  originalShiftId String
+  requestedDate   String
+  reason          String
+  status          String    @default("PENDING") // PENDING, APPROVED, REJECTED
+  reviewedBy      String?
+  reviewedAt      DateTime?
+  createdAt       DateTime  @default(now())
+
+  requester     User   @relation("RequesterSwaps", fields: [requesterId], references: [id], onDelete: Cascade)
+  targetNurse   User   @relation("TargetSwaps", fields: [targetNurseId], references: [id], onDelete: Cascade)
+  originalShift Shift  @relation(fields: [originalShiftId], references: [id], onDelete: Cascade)
+  reviewer      User?  @relation("ReviewerSwaps", fields: [reviewedBy], references: [id])
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  title     String
+  message   String
+  type      String   @default("INFO") // SHIFTS, LEAVE, SWAP, ROSTER, ALERT, INFO
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// AI PATIENT COMMUNICATION SIMULATOR MODELS
+model CommunicationScenario {
+  id            String   @id @default(uuid())
+  title         String
+  category      String   // Patient, Family Member, Elderly, Emergency, De-escalation
+  description   String
+  characterRole String   // Patient, Family Member, Elderly Patient, Young Adult, Parent, Caregiver
+  personality   String   // Anxious, Hostile, Confused, Demanding, Frightened, Reluctant
+  difficulty    String   @default("BEGINNER") // BEGINNER, INTERMEDIATE, ADVANCED
+  objectives    String   // JSON string array of learning objectives
+  createdAt     DateTime @default(now())
+
+  sessions CommunicationSession[]
+}
+
+model CommunicationSession {
+  id            String    @id @default(uuid())
+  userId        String
+  scenarioId    String
+  characterRole String
+  difficulty    String    @default("BEGINNER") // BEGINNER, INTERMEDIATE, ADVANCED
+  startedAt     DateTime  @default(now())
+  endedAt       DateTime?
+  status        String    @default("ACTIVE") // ACTIVE, COMPLETED, ABANDONED
+  overallScore  Int?      @default(0)
+  createdAt     DateTime  @default(now())
+
+  user       User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scenario   CommunicationScenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  messages   CommunicationMessage[]
+  analysis   CommunicationAnalysis?
+}
+
+model CommunicationMessage {
+  id        String   @id @default(uuid())
+  sessionId String
+  role      String   // NURSE or PATIENT
+  content   String
+  emotion   String?  @default("Calm") // Calm, Worried, Confused, Frustrated, Angry, Reassured
+  createdAt DateTime @default(now())
+
+  session CommunicationSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+}
+
+model CommunicationAnalysis {
+  id                          String   @id @default(uuid())
+  sessionId                   String   @unique
+  overallScore                Int      @default(0)
+  empathyScore                Int      @default(0)
+  activeListeningScore        Int      @default(0)
+  clarityScore                Int      @default(0)
+  professionalismScore        Int      @default(0)
+  emotionalIntelligenceScore Int      @default(0)
+  deEscalationScore           Int      @default(0)
+  patientEngagementScore     Int      @default(0)
+  confidenceScore             Int      @default(0)
+  strengths                   String   // JSON string
+  improvementAreas            String   // JSON string
+  feedback                    String   // Overall AI summary paragraph
+  highlights                  String?  // JSON string array of positive/negative quotes
+  createdAt                   DateTime @default(now())
+
+  session CommunicationSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+}
+
+// NURSE BREAK GAMES (TIC-TAC-TOE ❌⭕) MODEL
+model NurseGameScore {
+  id           String   @id @default(uuid())
+  userId       String
+  gameType     String   @default("TIC_TAC_TOE")
+  nurseWins    Int      @default(0)
+  aiWins       Int      @default(0)
+  draws        Int      @default(0)
+  pointsEarned Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
