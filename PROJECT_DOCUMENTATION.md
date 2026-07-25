@@ -84,58 +84,134 @@ Designed for 10-minute shift breaks, this 100% non-medical relaxation game allow
 
 ---
 
-## 7. Prisma Database Schema & Models
+## 7. Complete Prisma Database Schemas (All 12 Relational Models)
 
 ```prisma
+// 1. Staff User Credentials & Roles
 model User {
   id           String   @id @default(uuid())
   name         String
   email        String   @unique
   passwordHash String
   role         String   @default("NURSE") // NURSE, ADMIN, HEAD_NURSE
+  phone        String?
   employeeId   String   @unique
   departmentId String?
+  avatar       String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
+// 2. Hospital Ward Departments
+model Department {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+}
+
+// 3. Shift Hour Categories & Color Tokens
+model Shift {
+  id        String   @id @default(uuid())
+  name      String
+  startTime String
+  endTime   String
+  type      String   // MORNING, EVENING, NIGHT, OFF
+  color     String   // green, yellow, purple, gray
+  createdAt DateTime @default(now())
+}
+
+// 4. Daily Duty Roster Assignments
 model Roster {
   id           String   @id @default(uuid())
   nurseId      String
   shiftId      String
   departmentId String
   date         String   // YYYY-MM-DD
-  status       String   @default("SCHEDULED")
+  status       String   @default("SCHEDULED") // ON_DUTY, SCHEDULED, OFF, COMPLETED
   notes        String?
+  createdBy    String?
+  createdAt    DateTime @default(now())
 }
 
+// 5. Leave Requests & Approval History
+model LeaveRequest {
+  id         String    @id @default(uuid())
+  nurseId    String
+  leaveType  String
+  fromDate   String
+  toDate     String
+  reason     String
+  attachment String?
+  status     String    @default("PENDING") // PENDING, APPROVED, REJECTED
+  reviewedBy String?
+  reviewedAt DateTime?
+  createdAt  DateTime  @default(now())
+}
+
+// 6. Nurse-to-Nurse Shift Swap Requests
+model ShiftSwapRequest {
+  id              String    @id @default(uuid())
+  requesterId     String
+  targetNurseId   String
+  originalShiftId String
+  requestedDate   String
+  reason          String
+  status          String    @default("PENDING") // PENDING, APPROVED, REJECTED
+  reviewedBy      String?
+  reviewedAt      DateTime?
+  createdAt       DateTime  @default(now())
+}
+
+// 7. Push Notifications & Ward Alerts
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  title     String
+  message   String
+  type      String   @default("INFO") // SHIFTS, LEAVE, SWAP, ROSTER, ALERT, INFO
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+// 8. AI Roleplay Training Scenarios
 model CommunicationScenario {
   id            String   @id @default(uuid())
   title         String
-  category      String
+  category      String   // Patient, Family Member, Elderly, Emergency, De-escalation
   description   String
-  characterRole String
-  personality   String
-  difficulty    String   @default("BEGINNER")
-  objectives    String
+  characterRole String   // Patient, Family Member, Elderly Patient
+  personality   String   // Anxious, Hostile, Confused, Demanding
+  difficulty    String   @default("BEGINNER") // BEGINNER, INTERMEDIATE, ADVANCED
+  objectives    String   // JSON string array of learning objectives
+  createdAt     DateTime @default(now())
 }
 
+// 9. Active & Completed Roleplay Sessions
 model CommunicationSession {
   id            String    @id @default(uuid())
   userId        String
   scenarioId    String
   characterRole String
   difficulty    String    @default("BEGINNER")
-  status        String    @default("ACTIVE")
-  overallScore  Int?
+  startedAt     DateTime  @default(now())
+  endedAt       DateTime?
+  status        String    @default("ACTIVE") // ACTIVE, COMPLETED, ABANDONED
+  overallScore  Int?      @default(0)
+  createdAt     DateTime  @default(now())
 }
 
+// 10. Roleplay Conversation Dialogue Turns & Emotions
 model CommunicationMessage {
   id        String   @id @default(uuid())
   sessionId String
   role      String   // NURSE or PATIENT
   content   String
-  emotion   String?  @default("Calm")
+  emotion   String?  @default("Calm") // Calm, Worried, Confused, Frustrated, Angry, Reassured
+  createdAt DateTime @default(now())
 }
 
+// 11. 8-Competency AI Performance Evaluation Reports
 model CommunicationAnalysis {
   id                          String   @id @default(uuid())
   sessionId                   String   @unique
@@ -148,11 +224,14 @@ model CommunicationAnalysis {
   deEscalationScore           Int      @default(0)
   patientEngagementScore     Int      @default(0)
   confidenceScore             Int      @default(0)
-  strengths                   String
-  improvementAreas            String
-  feedback                    String
+  strengths                   String   // JSON string
+  improvementAreas            String   // JSON string
+  feedback                    String   // Overall AI summary paragraph
+  highlights                  String?  // JSON string array of positive/negative quotes
+  createdAt                   DateTime @default(now())
 }
 
+// 12. Nurse Break Game Scores & Wellness Points
 model NurseGameScore {
   id           String   @id @default(uuid())
   userId       String
@@ -161,6 +240,8 @@ model NurseGameScore {
   aiWins       Int      @default(0)
   draws        Int      @default(0)
   pointsEarned Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 ```
 
