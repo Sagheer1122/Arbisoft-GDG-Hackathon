@@ -19,19 +19,6 @@ Key AI innovations integrated into NurseFlow:
 
 ---
 
-## 📸 Application Screenshots Gallery
-
-| Application Screen | High-Resolution Preview |
-| :--- | :--- |
-| **Nurse Active Shift Dashboard** | ![Dashboard Overview](https://raw.githubusercontent.com/Sagheer1122/Arbisoft-GDG-Hackathon/main/screenshots/dashboard_overview.png) |
-| **Duty Roster Calendar Grid** | ![Duty Roster Calendar](https://raw.githubusercontent.com/Sagheer1122/Arbisoft-GDG-Hackathon/main/screenshots/roster_calendar.png) |
-| **Gemma 4 AI Patient Simulator Chat** | ![Gemma AI Communication Simulator](https://raw.githubusercontent.com/Sagheer1122/Arbisoft-GDG-Hackathon/main/screenshots/gemma_communication_simulator.png) |
-| **8-Competency AI Evaluation Report** | ![Gemma AI Evaluation Report](https://raw.githubusercontent.com/Sagheer1122/Arbisoft-GDG-Hackathon/main/screenshots/gemma_evaluation_results.png) |
-| **Gemma 4 AI Tick & Cross Break Game** | ![Gemma AI Tick & Cross Game](https://raw.githubusercontent.com/Sagheer1122/Arbisoft-GDG-Hackathon/main/screenshots/gemma_tick_tac_toe_break_game.png) |
-| **Shift Swap & Leave Requests Portal** | ![Shift Swaps & Requests](https://raw.githubusercontent.com/Sagheer1122/Arbisoft-GDG-Hackathon/main/screenshots/shift_swap_requests.png) |
-
----
-
 ## 📊 Key Metrics & Performance Summary
 
 | Metric | Specification | Impact |
