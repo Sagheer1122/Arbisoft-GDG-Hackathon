@@ -106,38 +106,108 @@ export class GemmaCommunicationService {
     turnCount: number
   ): string {
     const isAdvanced = difficulty === 'ADVANCED';
+    const lower = nurseText.toLowerCase();
+
+    // Turn index variation seed
+    const idx = (turnCount + nurseText.length) % 4;
+
+    // Contextual references to nurse content
+    let topicRef = '';
+    if (lower.includes('doctor') || lower.includes('physician')) {
+      topicRef = ' I appreciate you checking with the doctor. ';
+    } else if (lower.includes('pain') || lower.includes('hurt') || lower.includes('medicine') || lower.includes('medication')) {
+      topicRef = ' Thank you for addressing my pain concerns. ';
+    } else if (lower.includes('test') || lower.includes('blood') || lower.includes('scan') || lower.includes('x-ray')) {
+      topicRef = ' I was really worried about those test procedures. ';
+    } else if (lower.includes('family') || lower.includes('son') || lower.includes('daughter') || lower.includes('husband') || lower.includes('wife')) {
+      topicRef = ' Thank you for keeping my family informed. ';
+    }
 
     if (emotion === 'Reassured') {
-      return `Thank you so much for explaining that to me. I feel much more comfortable now knowing what to expect. You've really eased my mind.`;
+      const reassuredResponses = [
+        `Thank you so much, Nurse.${topicRef}I feel much more comfortable now knowing what to expect. You've really eased my mind.`,
+        `That really reassures me.${topicRef}I appreciate you taking the time to explain everything so kindly and clearly.`,
+        `I feel a lot better now.${topicRef}Thank you for treating me with such care and patience. I feel safe in your hands.`,
+        `That is such a relief to hear!${topicRef}Thank you for answering all my questions so thoughtfully.`
+      ];
+      return reassuredResponses[idx];
     }
 
     if (emotion === 'Calm') {
-      return `Alright, I hear what you're saying. That makes a lot more sense now. What should we do next?`;
+      const calmResponses = [
+        `Alright, I hear what you're saying.${topicRef}That makes a lot more sense now. What should we do next?`,
+        `I understand now.${topicRef}Thank you for clarifying that for me. What is the next step in my care plan?`,
+        `Okay, I'm feeling a bit more relaxed.${topicRef}Could you tell me how long this next step usually takes?`,
+        `That sounds reasonable.${topicRef}I'm glad you explained it. What should I prepare for next?`
+      ];
+      return calmResponses[idx];
     }
 
     if (emotion === 'Worried') {
       if (scenarioTitle.includes('Anxious')) {
-        return `I'm just really afraid of what these test results might show... Will it hurt? Are you sure everything is going to be okay?`;
+        const anxiousResponses = [
+          `I'm just really afraid of what these test results might show...${topicRef}Will the procedure hurt? Are you sure everything is going to be okay?`,
+          `My heart is racing...${topicRef}What if something goes wrong during the procedure? Can you stay with me?`,
+          `I haven't been able to sleep all night thinking about this.${topicRef}Could you explain what happens right before we start?`,
+          `I'm so nervous...${topicRef}Is it normal to feel this scared before a treatment like this?`
+        ];
+        return anxiousResponses[idx];
       }
-      return `I understand you're trying to help, but I'm still nervous about staying overnight. Who will be monitoring me?`;
+      const generalWorried = [
+        `I understand you're trying to help, but I'm still nervous.${topicRef}Who will be monitoring me during the shift?`,
+        `I'm really uneasy about this.${topicRef}What happens if my symptoms get worse while I'm waiting?`,
+        `I've never had to go through this before.${topicRef}Can you explain why this specific test is necessary?`,
+        `It all feels very overwhelming.${topicRef}Are you sure there aren't any alternative options?`
+      ];
+      return generalWorried[idx];
     }
 
     if (emotion === 'Frustrated') {
       if (isAdvanced) {
-        return `Look, you're giving me a lot of medical jargon, but nobody has actually checked my vitals or given me a straight answer! Why is this taking so long?`;
+        const advancedFrustrated = [
+          `Look, you're giving me medical jargon, but nobody has actually checked my vitals or given me a straight answer!${topicRef}Why is this taking so long?`,
+          `I've been asking the same question for the last hour!${topicRef}When is someone actually going to take action here?`,
+          `This isn't helping me.${topicRef}I need clear timelines, not vague promises. Who is in charge of this ward?`,
+          `We've been waiting endlessly!${topicRef}My patience is wearing thin and I need immediate assistance.`
+        ];
+        return advancedFrustrated[idx];
       }
-      return `I've been sitting here for hours! I just want a clear answer on when the doctor is going to see us.`;
+      const frustratedResponses = [
+        `I've been sitting here for hours!${topicRef}I just want a clear answer on when the doctor is going to see us.`,
+        `Why does everything in this hospital take so much time?${topicRef}We've been waiting in this room without any update!`,
+        `I'm getting really annoyed.${topicRef}Can someone please explain what the delay is about?`,
+        `This is becoming ridiculous.${topicRef}We deserve to know what is happening with our care plan right now!`
+      ];
+      return frustratedResponses[idx];
     }
 
     if (emotion === 'Angry' || emotion === 'Hostile') {
-      return `This is unacceptable service! My father needs attention NOW and all you keep telling me is to wait! Who is the manager on duty?`;
+      const angryResponses = [
+        `This is unacceptable service!${topicRef}My family needs attention NOW and all you keep telling me is to wait! Who is the manager on duty?`,
+        `I don't want to hear excuses anymore!${topicRef}You've ignored us for hours and I am not going to tolerate this treatment!`,
+        `Get me the head nurse or doctor right now!${topicRef}This level of care is completely unacceptable!`,
+        `I am beyond furious!${topicRef}No one is giving us proper answers and my patience has completely run out!`
+      ];
+      return angryResponses[idx];
     }
 
     if (emotion === 'Confused') {
-      return `Where are my shoes? I need to get home to feed my garden. Why am I in this room with all these machines?`;
+      const confusedResponses = [
+        `Where are my shoes? I need to get home to feed my garden.${topicRef}Why am I in this room with all these machines?`,
+        `I don't understand where I am...${topicRef}Who are you, and where is my family?`,
+        `Why is it so bright in here?${topicRef}Am I supposed to be somewhere else right now?`,
+        `Everything is so confusing...${topicRef}What day is it, nurse? What am I waiting for?`
+      ];
+      return confusedResponses[idx];
     }
 
-    return `I just need someone to listen to me and tell me what is happening.`;
+    const defaultResponses = [
+      `I just need someone to listen to me and tell me what is happening.${topicRef}`,
+      `Could you please explain that again? I want to make sure I understand.${topicRef}`,
+      `I'm listening, Nurse. What do we do next?${topicRef}`,
+      `Thank you for taking the time to speak with me.${topicRef}`
+    ];
+    return defaultResponses[idx];
   }
 
   /**
